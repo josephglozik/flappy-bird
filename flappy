@@ -1,0 +1,508 @@
+//Warning: to start the game you have to click on the tap button, you can't just click anywhere.
+
+var screen = "mainMenu";
+var textY = 85;
+var textSpeed = 2;
+var grassX = 0;
+var grassS = 5;
+var start = false;
+var gravity = 2;
+var gameOver = false;
+var score = 0;
+
+var topScores = [{
+
+    name: "Name",
+    score: 0,
+}, {
+
+    name: "Name",
+    score: 0,
+}, {
+
+    name: "Name",
+    score: 0,
+}, {
+
+    name: "Name",
+    score: 0,
+}, {
+
+    name: "Name",
+    score: 0,
+}];
+
+var grid = [
+
+    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 1, 3, 3, 3, 1, 2, 2, 1, 0, 0, 0, 0],
+    [0, 0, 0, 1, 3, 3, 3, 3, 1, 2, 2, 2, 2, 1, 0, 0, 0],
+    [0, 1, 1, 1, 1, 3, 3, 3, 1, 2, 2, 2, 1, 2, 1, 0, 0],
+    [1, 4, 4, 4, 4, 1, 3, 3, 1, 2, 2, 2, 1, 2, 1, 0, 0],
+    [1, 4, 4, 4, 4, 4, 1, 3, 3, 1, 2, 2, 2, 2, 1, 0, 0],
+    [1, 4, 4, 4, 4, 4, 1, 3, 3, 3, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 4, 4, 4, 1, 3, 3, 3, 1, 5, 5, 5, 5, 5, 5, 1],
+    [0, 0, 1, 1, 1, 3, 3, 3, 1, 5, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 1, 3, 3, 3, 3, 3, 3, 1, 5, 5, 5, 5, 5, 1, 0],
+    [0, 0, 0, 1, 1, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
+
+var drawFlappyBird = function(x, y, s, c) {
+
+    strokeWeight(1);
+
+    for (var a = 0; a < grid.length; a++) {
+
+        for (var b = 0; b < grid.length; b++) {
+
+            switch (grid[b][a]) {
+
+                case 1:
+                    stroke(0);
+                    fill(0);
+                    rect(a * s + x, b * s + y, s, s);
+                    break;
+                case 2:
+                    stroke(255);
+                    fill(255);
+                    rect(a * s + x, b * s + y, s, s);
+                    break;
+                case 3:
+                    if (c === "b&w") {
+                        stroke(200);
+                        fill(200);
+                    } else {
+                        stroke(255, 255, 0);
+                        fill(255, 255, 0);
+                    }
+                    rect(a * s + x, b * s + y, s, s);
+                    break;
+                case 4:
+                    if (c === "b&w") {
+                        stroke(175);
+                        fill(175);
+                    } else {
+                        stroke(255, 245, 0);
+                        fill(255, 245, 0);
+                    }
+                    rect(a * s + x, b * s + y, s, s);
+                    break;
+                case 5:
+                    if (c === "b&w") {
+                        stroke(150);
+                        fill(150);
+                    } else {
+                        stroke(255, 65, 0);
+                        fill(255, 65, 0);
+                    }
+                    rect(a * s + x, b * s + y, s, s);
+                    break;
+            }
+        }
+    }
+};
+
+var FlappyBird = function(x, y, w, h, angle, jumpSpeed, fallSpeed, bounceSpeed, hopSpeed) {
+
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h = h;
+    this.angle = angle;
+    this.jumpSpeed = jumpSpeed;
+    this.fallSpeed = fallSpeed;
+    this.bounceSpeed = bounceSpeed;
+    this.hopSpeed = hopSpeed;
+};
+
+var flappyBird = new FlappyBird(75, 165, 45, 30, 0, 40, 1, 25, 1);
+
+FlappyBird.prototype.draw = function() {
+
+    pushMatrix();
+    translate(this.x, this.y);
+    rotate(this.angle);
+    drawFlappyBird(0, 0, 2.5, "normal");
+    popMatrix();
+};
+
+FlappyBird.prototype.pregameMovement = function() {
+
+    this.y += this.hopSpeed;
+
+    if (this.y > 170) {
+        this.hopSpeed = -1;
+    }
+
+    if (this.y < 160) {
+        this.hopSpeed = 1;
+    }
+};
+
+FlappyBird.prototype.fly = function() {
+
+    if (this.angle > -45) {
+        this.angle -= this.bounceSpeed;
+    }
+
+    this.y -= this.jumpSpeed;
+};
+
+FlappyBird.prototype.fall = function() {
+
+    if (this.angle < 90) {
+        this.angle += this.fallSpeed;
+    }
+
+    this.y += gravity;
+};
+
+FlappyBird.prototype.die = function() {
+
+    if (this.y < 0) {
+        gameOver = true;
+    }
+
+    if (this.y + this.h > 350) {
+        gameOver = true;
+    }
+};
+
+var Pipe = function(x, y, w, h1, h2, speed) {
+
+    this.x = x;
+    this.y = y;
+    this.w = w;
+    this.h1 = h1;
+    this.h2 = h2;
+    this.speed = speed;
+};
+
+var pipes = new Pipe([500, 750], [0, 0], [50, 50], [random(50, 125), random(50, 125)], [random(50, 125), random(50, 125)], [5, 5]);
+
+Pipe.prototype.draw = function() {
+
+    strokeWeight(2);
+    stroke(0);
+    fill(0, 125, 0);
+
+    for (var i = 0; i < this.x.length; i++) {
+        rect(this.x[i], this.y[i], this.w[i], this.h1[i]);
+        rect(this.x[i] - 3, this.y[i] + this.h1[i] - 20, this.w[i] + 6, 20);
+
+        rect(this.x[i], 350 - this.h2[i], this.w[i], this.h2[i]);
+        rect(this.x[i] - 3, 350 - this.h2[i], this.w[i] + 6, 20);
+    }
+};
+
+Pipe.prototype.move = function() {
+
+    for (var i = 0; i < this.x.length; i++) {
+
+        this.x[i] -= this.speed[i];
+
+        if (this.x[i] <= -50) {
+            this.x[i] = 450;
+            this.h1[i] = random(50, 125);
+            this.h2[i] = random(50, 125);
+        }
+
+        if (flappyBird.x + flappyBird.w > this.x[i] + this.w[i] / 2 && flappyBird.x + flappyBird.w < this.x[i] + this.w[i] / 2 + 8) {
+            score++;
+        }
+    }
+};
+
+Pipe.prototype.collision = function() {
+
+    for (var i = 0; i < this.x.length; i++) {
+
+        if ((flappyBird.x + flappyBird.w > this.x[i] && flappyBird.x < this.x[i] + this.w[i]) && ((flappyBird.y + flappyBird.h > this.y[i] && flappyBird.y - 10 < this.y[i] + this.h1[i]) || (flappyBird.y + flappyBird.h > 350 - this.h2[i] && flappyBird.y < 350))) {
+            gameOver = true;
+        }
+    }
+};
+
+var font = function(x, y, label, pColor, sColor, thickness) {
+
+    fill(sColor);
+    text(label, x + thickness, y);
+    text(label, x + thickness, y + thickness);
+    fill(pColor);
+    text(label, x, y);
+};
+
+var setting = function() {
+
+    background(85, 160, 200);
+
+    noStroke();
+    fill(255);
+    rect(0, 255, 400, 75);
+
+    for (var i = 25; i < 475; i += 125) {
+        arc(i, 255, 75, 50, 180, 360);
+        arc(i + 65, 265, 75, 50, 180, 360);
+    }
+
+    stroke(75, 130, 180);
+    strokeWeight(3);
+    fill(175, 190, 225);
+
+    for (var i = 0; i < 475; i += 150) {
+        rect(i, 262, 25, 50);
+        rect(i - 10, 277, 25, 55);
+        rect(i + 85, 268, 30, 55);
+        rect(i + 95, 288, 30, 55);
+        rect(i + 20, 292, 50, 25);
+        beginShape();
+        vertex(i + 225 - 175, 210 + 50);
+        vertex(i + 240 - 175, 210 + 50);
+        vertex(i + 240 - 175, 200 + 52);
+        vertex(i + 255 - 175, 200 + 52);
+        vertex(i + 255 - 175, 270 + 50);
+        vertex(i + 225 - 175, 260 + 50);
+        endShape(CLOSE);
+    }
+
+    stroke(45, 125, 45);
+    fill(80, 175, 80);
+    rect(-5, 310, 410, 50);
+
+    for (var i = 50; i < 475; i += 100) {
+        fill(80, 175, 80);
+        arc(i, 350 - 35, 65, 25, 180, 360);
+        arc(i - 40, 355 - 35, 65, 25, 180, 360);
+        arc(i, 365 - 35, 65, 25, 180, 360);
+    }
+
+    noStroke();
+    fill(175, 165, 85);
+    rect(0, 365, 400, 35);
+    fill(90, 155, 50);
+    rect(0, 350, 400, 12);
+    fill(145, 135, 50);
+    rect(0, 362, 400, 4);
+    fill(65, 135, 35);
+
+    for (var x = 10; x < 800; x += 25) {
+        rect(grassX + x, 350, 12, 4);
+        rect(grassX + x - 5, 354, 12, 4);
+        rect(grassX + x - 10, 358, 12, 4);
+    }
+
+    grassX -= grassS;
+
+    if (grassX < -400) {
+        grassX = 0;
+    }
+
+    stroke(0);
+    line(0, 350, 400, 350);
+};
+
+var button = function(x, y, label, nextScreen) {
+
+    stroke(0);
+    strokeWeight(3);
+    fill(255);
+    rect(x, y, 125, 40);
+
+    if (mouseX > x && mouseX < x + 125 && mouseY > y && mouseY < y + 40) {
+        fill(245, 0, 0);
+        cursor(HAND);
+
+        if (mouseIsPressed) {
+            screen = nextScreen;
+        }
+
+    } else {
+        fill(255, 0, 0);
+    }
+
+    noStroke();
+    rect(x + 5, y + 5, 115, 30);
+
+    fill(0);
+    textSize(20);
+    font(x + 62, y + 18, label, color(255), color(0), 3);
+};
+
+var mainMenu = function() {
+
+    setting();
+
+    textSize(35);
+    font(155, textY, "Flappy Bird", color(65, 135, 35), color(0), 3);
+    drawFlappyBird(275, textY - 15, 3, "normal");
+
+    textY += textSpeed;
+
+    if (textY > 92) {
+        textSpeed = -0.5;
+    }
+
+    if (textY < 85) {
+        textSpeed = 0.5;
+    }
+
+    noStroke();
+    fill(0, 0, 0);
+    button(50, 270, "Start", "play");
+    button(225, 270, "Scores", "scores");
+    textSize(20);
+    font(200, 380, "Kevin 23", color(255), color(140, 100, 0), 2);
+};
+
+var scores = function() {
+
+    background(85, 160, 200);
+    textSize(50);
+    font(200, 50, "Top Scores", color(215, 130, 20), color(255), 2);
+    textSize(25);
+    fill(65, 135, 35);
+
+    for (var i = 0; i < topScores.length; i++) {
+        text((i + 1) + ".", 100, i * 35 + 125);
+        text(topScores[i].name, 165, i * 35 + 125);
+        text(topScores[i].score, 300, i * 35 + 125);
+    }
+
+    button(135, 325, "Back", "mainMenu");
+};
+
+var prePlay = function() {
+
+    textSize(40);
+    font(200, 65, "Get Ready", color(215, 130, 20), color(255), 2);
+
+    stroke(255);
+    fill(255, 0, 0);
+    beginShape();
+    vertex(225, 200);
+    vertex(275, 200);
+    vertex(275, 225);
+    vertex(225, 225);
+    vertex(210, 212.5);
+    endShape(CLOSE);
+    textSize(18);
+    fill(255);
+    text("Tap", 248, 212);
+
+    drawFlappyBird(175, 125, 2.5, "b&w");
+
+    if (mouseIsPressed && mouseX > 210 && mouseX < 275 && mouseY > 200 && mouseY < 225) {
+        start = true;
+    }
+
+};
+
+var gameOverScreen = function() {
+
+    noLoop();
+
+    textSize(50);
+    font(200, 55, "Game Over", color(215, 130, 20), color(255), 2);
+
+    strokeWeight(3);
+    stroke(0);
+    fill(175, 165, 85);
+    rect(50, 125, 300, 150);
+    strokeWeight(3);
+    stroke(175, 125, 25);
+    rect(60, 135, 280, 130);
+    fill(175, 125, 25);
+    textSize(25);
+    text("Score", 265, 155);
+    text("Medal", 135, 155);
+    textSize(38);
+    font(265, 215, score, color(255), color(0), 2);
+    noStroke();
+
+    if (score < 10) {
+        fill(150, 145, 75);
+        ellipse(135, 215, 50, 50);
+    }
+    if (score >= 10 && score < 20) {
+        fill(135, 75, 35);
+        ellipse(135, 215, 50, 50);
+        drawFlappyBird(114, 200, 2.5, "b&w");
+    }
+    if (score >= 20 && score < 30) {
+        fill(135);
+        ellipse(135, 215, 50, 50);
+        drawFlappyBird(113, 200, 2.5, "b&w");
+    }
+    if (score >= 30) {
+        fill(235, 225, 0);
+        ellipse(135, 215, 50, 50);
+        drawFlappyBird(114, 200, 2.5, "b&w");
+    }
+};
+
+var play = function() {
+
+    setting();
+
+    flappyBird.draw();
+
+    if (start === false) {
+        prePlay();
+        flappyBird.pregameMovement();
+    }
+
+    if (start === true) {
+
+        flappyBird.fall();
+        flappyBird.die();
+        pipes.draw();
+        pipes.move();
+        pipes.collision();
+
+        if (gameOver === false) {
+            textSize(35);
+            font(200, 35, score, color(255), color(0), 2);
+        }
+        if (gameOver === true) {
+            gameOverScreen();
+        }
+    }
+};
+
+var game = function() {
+
+    textFont(createFont("Impact"));
+    textAlign(CENTER, CENTER);
+    cursor(ARROW);
+
+    switch (screen) {
+
+        case "mainMenu":
+            mainMenu();
+            break;
+        case "scores":
+            scores();
+            break;
+        case "play":
+            play();
+            break;
+    }
+};
+
+var mouseClicked = function() {
+
+    if (start === true) {
+        flappyBird.fly();
+    }
+};
+
+var draw = function() {
+
+    game();
+};
